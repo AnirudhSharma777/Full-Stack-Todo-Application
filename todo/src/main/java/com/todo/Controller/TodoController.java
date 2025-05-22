@@ -13,7 +13,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1")
-@CrossOrigin(origins = "http://localhost:5173") // Specific for your React app, or configure globally
+@CrossOrigin(origins = "https://full-stack-todo-application-six.vercel.app/") // Specific for your React app, or configure globally
 public class TodoController {
 
     @Autowired
