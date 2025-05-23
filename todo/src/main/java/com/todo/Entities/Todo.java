@@ -26,7 +26,7 @@ public class Todo {
     private String description;
 
     @Column(nullable = false)
-    private boolean completed = false; 
+    private boolean completed;
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
