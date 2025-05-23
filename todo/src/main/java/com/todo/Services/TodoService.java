@@ -1,12 +1,13 @@
 package com.todo.Services;
 
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.todo.Dto.TodoDto;
 import com.todo.Entities.Todo;
 import com.todo.Exception.ResourceNotFoundException;
 import com.todo.Repositories.TodoRepository;
+import com.todo.ResponseDto.TodoResponseDto;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -17,38 +18,37 @@ public class TodoService {
     @Autowired
     private TodoRepository todoRepository;
 
-    public List<Todo> getAllTodos() {
-        return todoRepository.findAllByOrderByCreatedAtAsc();
+    @Autowired
+    private TodoMapper todoMapper;
+
+    public List<TodoResponseDto> getAllTodos() {
+        return todoRepository.findAllByOrderByCreatedAtAsc().stream().map(todoMapper::maptoTodoResponseDto).toList();
     }
 
-    public Todo getTodoById(String id) {
-        return todoRepository.findById(id)
+    public TodoResponseDto getTodoById(String id) {
+        return todoRepository.findById(id).map(todoMapper::maptoTodoResponseDto)
                 .orElseThrow(() -> new ResourceNotFoundException("Todo not found with id: " + id));
     }
 
-    public Todo addTodo(Todo todo) {
-        
-        if (todo.getId() != null) { 
-            todo.setId(null);
-        }
-        if (todo.getDescription() == null) {
-            todo.setDescription(""); 
-        }
-        todo.setCompleted(false); 
-        todo.setCreatedAt(LocalDateTime.now());
-        return todoRepository.save(todo);
+    public TodoResponseDto addTodo(TodoDto todoDto) {
+
+        Todo todo = todoMapper.maptoTodo(todoDto);
+        Todo savedTodo = todoRepository.save(todo);
+        return todoMapper.maptoTodoResponseDto(savedTodo);
+
     }
 
-    public Todo updateTodo(String id, Todo todoDetails) {
+    public TodoResponseDto updateTodo(String id, TodoDto todoDetails) {
         Todo todo = todoRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Todo not found with id: " + id));
 
-        todo.setTitle(todoDetails.getTitle());
-        todo.setDescription(todoDetails.getDescription());
-        todo.setCompleted(todoDetails.isCompleted());
+        todo.setTitle(todoDetails.title());
+        todo.setDescription(todoDetails.description());
         todo.setUpdatedAt(LocalDateTime.now());
 
-        return todoRepository.save(todo);
+        Todo updatedTodo = todoRepository.save(todo);
+
+        return todoMapper.maptoTodoResponseDto(updatedTodo);
     }
 
     public void deleteTodo(String id) {
